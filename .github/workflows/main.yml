@@ -3,30 +3,27 @@ name: Build WF
 on: 
   push:
     branches:
-      - main  # Yahan space fix kar diya
+      - main  # Dash ke baad space fix kar diya
 
 jobs:
-  Build:  # Ye job ka naam hai
+  Build:  # Job ka naam Capital 'B' se
     runs-on: ubuntu-latest
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Maven Build
-        # vProfile ke liye 'mvn install' aur checkstyle skip flags
+      - name: Meaven Build
         run: mvn clean install -DskipTests -Dnohttp.skip=true -Dcheckstyle.skip
 
   Testing:
     runs-on: ubuntu-latest
-    needs: Build  # Yahan 'B' capital kar diya taaki upar wale job se match kare
+    needs: Build  # Build ke 'B' ko match kiya upar wale job se
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Run tests
-        # Tests run karte waqt bhi security checks skip kar rahe hain
+      - name: Run tests on main branch
         run: mvn test -Dnohttp.skip=true -Dcheckstyle.skip
 
-      - name: Checkstyle Report
-        # Agar sirf report check karni hai
+      - name: Checkstyle
         run: mvn checkstyle:checkstyle -Dnohttp.skip=true
