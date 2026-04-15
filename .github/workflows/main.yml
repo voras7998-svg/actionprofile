@@ -21,10 +21,10 @@ jobs:
     needs: Build  # Build ka 'B' capital rakha hai (Matching job name)
     steps:
       - name: Code checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v16
 
       - name: Run tests on main branch
-        run: mvn test -Dnohttp.skip=true -Dcheckstyle.skip
+        run: Maven test -Dnohttp.skip=true -Dcheckstyle.skip
 
       - name: Checkstyle
         # Agar tu asaliyat mein checkstyle run karna chahta hai
