@@ -1,31 +1,43 @@
-name: Build WF
+name: Vprofile CICD Workflow
 
-on: 
-  push:
-    branches:
-      - main  # Yahan space zaroori hai
+on:
+  #push:
+   # branches: [ "main", "develop" ]
+
+  pull_request:
+    bramches:
+      - main
+    #branches: [ "main", "develop" ]
+
+  #workflow_dispatch:
+
+  #schedule:
+    #- cron: "0 2 * * *"   # nightly run at 2 AM UTC
 
 jobs:
   Build:
     runs-on: ubuntu-latest
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Maven Build
-        # Wahi skip flags jo humne Jenkins mein use kiye the
-        run: mvn clean install -DskipTests -Dnohttp.skip=true -Dcheckstyle.skip
+        run: mvn install
+
 
   Testing:
     runs-on: ubuntu-latest
-    needs: Build  # Build ka 'B' capital rakha hai (Matching job name)
+    needs: Build
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run tests on main branch
-        run: mvn test -Dnohttp.skip=true -Dcheckstyle.skip
+        run: mvn test
 
       - name: Checkstyle
-        # Agar tu asaliyat mein checkstyle run karna chahta hai
-        run: mvn checkstyle:checkstyle -Dnohttp.skip=true
+        run: mvn checkstyle:checkstyle
