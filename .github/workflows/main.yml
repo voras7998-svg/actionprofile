@@ -1,15 +1,17 @@
 name: Vprofile CICD Workflow
-
 on: 
   push:
     branches: 
       - main
+
   pull_request:
     branches: 
       - main
+
   workflow_dispatch:
+
   schedule:
-    - cron: "10 14 * * 1-5"   # Nightly run at 2:10 pm UTC
+    - cron: "10 14 * * 1-5"   # After noon 2:10 pm, Mondat to Friday
 
 env:
   ECR_REPOSITORY: 'vprofile-appimage'
@@ -38,6 +40,7 @@ jobs:
       - name: Notify if Build Fails
         if: failure()
         run: echo "🚨 Build job failed! Please check logs."
+
 
   Testing:
     runs-on: ubuntu-latest
@@ -70,28 +73,21 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy filesystem scan
-        # Fixed: '@v0.28.0' use kiya jo working hai
-        uses: aquasecurity/trivy-action@v0.28.0
+        # FIX: Wahi master wala logic jo tune bola tha
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          format: 'table'   # Console mein report dikhane ke liye
+          format: 'table'
           exit-code: 0
           vuln-type: 'os,library'
 
-      - name: Generate JSON report for Artifact
-        # Alag se JSON report save kar rahe hain backup ke liye
-        uses: aquasecurity/trivy-action@v0.28.0
-        with:
-          scan-type: 'fs'
-          format: 'json'
-          output: 'trivy-results.json'
-
-      - name: Upload Trivy scan results
+      - name: Upload Trivy scan results as artifact
         uses: actions/upload-artifact@v4
         with:
           name: trivy-scan-results
-          path: trivy-results.json
+          # FIX: Path mein dot (.) wala logic
+          path: .
 
   BUILD_AND_PUBLISH:
     name: BUILD_AND_PUBLISH
@@ -122,5 +118,5 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -f Docker-files/app/multistage/Dockerfile -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          docker build -f Docker-files/app/multistage/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
